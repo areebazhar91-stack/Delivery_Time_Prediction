@@ -11,15 +11,15 @@ st.set_page_config(page_title="Delivery Time Predictor", page_icon="🚚")
 st.title("🚚 Delivery Time Prediction")
 st.write("Enter the details below to predict how long the delivery will take.")
 
-# --- Input fields ---
+# --- Input fields (using exact categories from your data) ---
 distance = st.number_input("Distance (km)", min_value=0.0, value=5.0, step=0.1)
 prep_time = st.number_input("Preparation Time (minutes)", min_value=0, value=15, step=1)
 experience = st.number_input("Courier Experience (years)", min_value=0.0, value=2.0, step=0.5)
 
-weather = st.selectbox("Weather", ["Sunny", "Rainy", "Foggy", "Windy", "Cloudy"])
+weather = st.selectbox("Weather", ["Windy", "Clear", "Foggy", "Rainy", "Snowy"])
 traffic = st.selectbox("Traffic Level", ["Low", "Medium", "High"])
-time_of_day = st.selectbox("Time of Day", ["Morning", "Afternoon", "Evening", "Night"])
-vehicle = st.selectbox("Vehicle Type", ["Bike", "Scooter", "Motorcycle", "Car"])
+time_of_day = st.selectbox("Time of Day", ["Afternoon", "Evening", "Night", "Morning"])
+vehicle = st.selectbox("Vehicle Type", ["Scooter", "Bike", "Car"])
 
 if st.button("Predict Delivery Time"):
     # Create input dataframe
@@ -40,14 +40,10 @@ if st.button("Predict Delivery Time"):
     input_encoded['Distance_per_Exp'] = input_encoded['Distance_km'] / (input_encoded['Courier_Experience_yrs'] + 1)
     input_encoded['Prep_plus_Distance'] = input_encoded['Preparation_Time_min'] + input_encoded['Distance_km']
 
-    # Force the columns to match exactly what the model expects
+    # Force exact column match
     input_encoded = input_encoded.reindex(columns=model_columns, fill_value=0)
 
     # Predict
-    try:
-        prediction = model.predict(input_encoded)[0]
-        st.success(f"**Predicted Delivery Time: {prediction:.1f} minutes**")
-        st.balloons()
-    except Exception as e:
-        st.error("Prediction failed. Please check the category values.")
-        st.write("Error details:", str(e))
+    prediction = model.predict(input_encoded)[0]
+    st.success(f"**Predicted Delivery Time: {prediction:.1f} minutes**")
+    st.balloons()
