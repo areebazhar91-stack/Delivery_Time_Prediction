@@ -33,18 +33,21 @@ if st.button("Predict Delivery Time"):
         'Vehicle_Type': [vehicle]
     })
 
-    # One-hot encode (same as training)
+    # One-hot encode
     input_encoded = pd.get_dummies(input_df)
 
-    # Add engineered features (same as training)
+    # Add engineered features
     input_encoded['Distance_per_Exp'] = input_encoded['Distance_km'] / (input_encoded['Courier_Experience_yrs'] + 1)
     input_encoded['Prep_plus_Distance'] = input_encoded['Preparation_Time_min'] + input_encoded['Distance_km']
 
-    # Make columns match exactly what the model expects
+    # Force the columns to match exactly what the model expects
     input_encoded = input_encoded.reindex(columns=model_columns, fill_value=0)
 
     # Predict
-    prediction = model.predict(input_encoded)[0]
-
-    st.success(f"**Predicted Delivery Time: {prediction:.1f} minutes**")
-    st.balloons()
+    try:
+        prediction = model.predict(input_encoded)[0]
+        st.success(f"**Predicted Delivery Time: {prediction:.1f} minutes**")
+        st.balloons()
+    except Exception as e:
+        st.error("Prediction failed. Please check the category values.")
+        st.write("Error details:", str(e))
